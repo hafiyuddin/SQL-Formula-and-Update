@@ -1,0 +1,884 @@
+															--Formula Request Completed--
+														 --Update Daily Formula Request Report--
+
+Select * from [Cisco Report].dbo.Formula_REQ order by Request ASC
+
+Insert into [Cisco Report].dbo.Formula_REQ (Request, [External Request Number], Company, Created, [Task Number State(state)], [Short description], [Partner Order Number], ECC,
+YVAS, Quantity, [Request Type], Country2, GEO)
+select Request, [External Request Number], Company, Created, [Task Number State(state)], [Short description], [Partner Order Number], ECC,
+YVAS, Quantity, [Request Type], Country2, GEO from [Cisco Report].dbo.Formula_REQ$ 
+ORDER BY Request ASC
+
+--Delete after finish everything--
+
+drop table [Cisco Report].dbo.b1 --after generating the report
+drop table [Cisco Report].dbo.b2
+drop table [Cisco Report].dbo.b3
+drop table [Cisco Report].dbo.b4
+drop table [Cisco Report].dbo.b5
+drop table [Cisco Report].dbo.b6
+drop table [Cisco Report].dbo.b7
+drop table [Cisco Report].dbo.b8
+drop table [Cisco Report].dbo.b9
+drop table [Cisco Report].dbo.b10
+drop table [Cisco Report].dbo.b11
+drop table [Cisco Report].dbo.b12
+drop table [Cisco Report].dbo.b13
+drop table [Cisco Report].dbo.b14
+drop table [Cisco Report].dbo.b15
+drop table [Cisco Report].dbo.b16
+drop table [Cisco Report].dbo.b17
+drop table [Cisco Report].dbo.b18
+drop table [Cisco Report].dbo.b19
+drop table [Cisco Report].dbo.b20
+drop table [Cisco Report].dbo.b21
+drop table [Cisco Report].dbo.b22 --need to drop all this table because going to generate it again with new data
+
+ALTER TABLE [Cisco Report].dbo.Formula_REQ --then drop all unneccessary column
+DROP COLUMN newdeliverydate;
+
+ALTER TABLE [Cisco Report].dbo.Formula_REQ 
+DROP COLUMN newshipdate;
+
+ALTER TABLE [Cisco Report].dbo.Formula_REQ 
+DROP COLUMN newhirestartdate;
+
+ALTER TABLE [Cisco Report].dbo.Formula_REQ 
+DROP COLUMN newassetcreateddate;
+
+ALTER TABLE [Cisco Report].dbo.Formula_REQ 
+DROP COLUMN newafter10daysdate;
+
+ALTER TABLE [Cisco Report].dbo.Formula_REQ 
+DROP COLUMN newcreateddate;
+
+ALTER TABLE [Cisco Report].dbo.Formula_REQ 
+DROP COLUMN newrejectioncoacreated;
+
+delete from [Cisco Report].dbo.Formula_REQ --only run this when want to generate new daily report
+
+--Delete after finish everything-- 
+
+alter table [Cisco Report].dbo.Formula_REQ  --1
+	 add [Order Drop Bundle] nvarchar(255)
+
+	 update [Cisco Report].dbo.Formula_REQ  
+		set [Cisco Report].dbo.Formula_REQ.[Order Drop Bundle] = 
+		(select [New Order Drop Bundle] from [Cisco Report].dbo.b1 
+		where [Cisco Report].dbo.b1.Request = [Cisco Report].dbo.Formula_REQ.Request)
+
+	 alter table [Cisco Report].dbo.Formula_REQ --2
+	 add [Serial Number] nvarchar(255)
+
+	 update [Cisco Report].dbo.Formula_REQ  
+		set [Cisco Report].dbo.Formula_REQ.[Serial Number] = 
+		(select [New Serial Number] from [Cisco Report].dbo.b2 
+		where [Cisco Report].dbo.b2.Request = [Cisco Report].dbo.Formula_REQ.Request)
+
+	 alter table [Cisco Report].dbo.Formula_REQ --3
+	 add [Asset Created Date] datetime
+
+	  update [Cisco Report].dbo.Formula_REQ  
+		set [Cisco Report].dbo.Formula_REQ.[Asset Created Date] = 
+		(select [New Asset Created Date] from [Cisco Report].dbo.b3 
+		where [Cisco Report].dbo.b3.Request = [Cisco Report].dbo.Formula_REQ.Request)
+
+	 alter table [Cisco Report].dbo.Formula_REQ --4
+	 add [Ship Date] datetime
+
+	 update [Cisco Report].dbo.Formula_REQ  
+		set [Cisco Report].dbo.Formula_REQ.[Ship Date] = 
+		(select [New Shipment Date] from [Cisco Report].dbo.b4 
+		where [Cisco Report].dbo.b4.Request = [Cisco Report].dbo.Formula_REQ.Request)
+
+	 alter table [Cisco Report].dbo.Formula_REQ --5 
+	 add [Delivery Date] datetime
+
+	 update [Cisco Report].dbo.Formula_REQ  
+		set [Cisco Report].dbo.Formula_REQ.[Delivery Date] = 
+		(select [new delivery date] from [Cisco Report].dbo.b18 
+		where [Cisco Report].dbo.b18.Request = [Cisco Report].dbo.Formula_REQ.Request)
+
+	 alter table [Cisco Report].dbo.Formula_REQ --6
+	 add [Tracking Number] nvarchar(255)
+
+	 update [Cisco Report].dbo.Formula_REQ  
+		set [Cisco Report].dbo.Formula_REQ.[Tracking Number] = 
+		(select [New Tracking Number] from [Cisco Report].dbo.b5 
+		where [Cisco Report].dbo.b5.Request = [Cisco Report].dbo.Formula_REQ.Request)
+
+	 alter table [Cisco Report].dbo.Formula_REQ --7
+	 add [Delivery Status] nvarchar(255)
+
+	 update [Cisco Report].dbo.Formula_REQ  
+		set [Cisco Report].dbo.Formula_REQ.[Delivery Status] = 
+		(select [New Delivery Status] from [Cisco Report].dbo.b6 
+		where [Cisco Report].dbo.b6.Request = [Cisco Report].dbo.Formula_REQ.Request)
+
+	 alter table [Cisco Report].dbo.Formula_REQ --8
+	 add [Acceptance Status] nvarchar(255)
+
+	 update [Cisco Report].dbo.Formula_REQ  
+		set [Cisco Report].dbo.Formula_REQ.[Acceptance Status] = 
+		(select [New Acceptance Status] from [Cisco Report].dbo.b7 
+		where [Cisco Report].dbo.b7.Request = [Cisco Report].dbo.Formula_REQ.Request)
+
+	 alter table [Cisco Report].dbo.Formula_REQ --9
+	 add [Billing Status] nvarchar(255)
+
+	 update [Cisco Report].dbo.Formula_REQ  
+		set [Cisco Report].dbo.Formula_REQ.[Billing Status] = 
+		(select [New Billing Status] from [Cisco Report].dbo.b8 
+		where [Cisco Report].dbo.b8.Request = [Cisco Report].dbo.Formula_REQ.Request)
+
+	 alter table [Cisco Report].dbo.Formula_REQ --10
+	 add RR nvarchar(255)
+
+	 update [Cisco Report].dbo.Formula_REQ  
+		set [Cisco Report].dbo.Formula_REQ.RR = 
+		(select [New RR] from [Cisco Report].dbo.b9 
+		where [Cisco Report].dbo.b9.Request = [Cisco Report].dbo.Formula_REQ.Request)
+
+		alter table [Cisco Report].dbo.Formula_REQ --11
+	 add [Request State] nvarchar(255)
+
+	 update [Cisco Report].dbo.Formula_REQ  
+		set [Cisco Report].dbo.Formula_REQ.[Request State] = 
+		(select [New Request State] from [Cisco Report].dbo.b10 
+		where [Cisco Report].dbo.b10.Request = [Cisco Report].dbo.Formula_REQ.Request)
+
+	 alter table [Cisco Report].dbo.Formula_REQ --12
+	 add [Customer Delivery status] nvarchar(255)
+
+	  update [Cisco Report].dbo.Formula_REQ  
+		set [Cisco Report].dbo.Formula_REQ.[Customer Delivery status] = 
+		(select [New Customer Delivery State] from [Cisco Report].dbo.b11 
+		where [Cisco Report].dbo.b11.Request = [Cisco Report].dbo.Formula_REQ.Request)
+
+	 alter table [Cisco Report].dbo.Formula_REQ --13
+	 add [New Hire Start Date] datetime
+
+	  update [Cisco Report].dbo.Formula_REQ  
+		set [Cisco Report].dbo.Formula_REQ.[New Hire Start Date] = 
+		(select [New hire start date2] from [Cisco Report].dbo.b12 
+		where [Cisco Report].dbo.b12.Request = [Cisco Report].dbo.Formula_REQ.Request)
+
+
+	 alter table [Cisco Report].dbo.Formula_REQ --14
+	 add [Rejection COA Created] datetime
+
+	 update [Cisco Report].dbo.Formula_REQ  
+		set [Cisco Report].dbo.Formula_REQ.[Rejection COA Created] = 
+		(select [New Rejection COA Created] from [Cisco Report].dbo.b13 
+		where [Cisco Report].dbo.b13.Request = [Cisco Report].dbo.Formula_REQ.Request)
+
+	 alter table [Cisco Report].dbo.Formula_REQ --15
+	 add [Rejection Task Type] nvarchar(255)
+
+	 update [Cisco Report].dbo.Formula_REQ  
+		set [Cisco Report].dbo.Formula_REQ.[Rejection Task Type] = 
+		(select [New Rejection Task Type] from [Cisco Report].dbo.b14 
+		where [Cisco Report].dbo.b14.Request = [Cisco Report].dbo.Formula_REQ.Request)
+
+	 alter table [Cisco Report].dbo.Formula_REQ --16
+	 add [Rejection Reason] nvarchar(255)
+
+	 update [Cisco Report].dbo.Formula_REQ  
+		set [Cisco Report].dbo.Formula_REQ.[Rejection Reason] = 
+		(select [New Rejection Reason] from [Cisco Report].dbo.b15 
+		where [Cisco Report].dbo.b15.Request = [Cisco Report].dbo.Formula_REQ.Request)
+
+	 alter table [Cisco Report].dbo.Formula_REQ --17
+	 add [PCaas serial number] nvarchar(255)
+
+	 update [Cisco Report].dbo.Formula_REQ  
+		set [Cisco Report].dbo.Formula_REQ.[PCaas serial number] = 
+		(select [New Pcaas serial number] from [Cisco Report].dbo.b16 
+		where [Cisco Report].dbo.b16.Request = [Cisco Report].dbo.Formula_REQ.Request)
+
+	 alter table [Cisco Report].dbo.Formula_REQ --18
+	 add [Request State1] nvarchar(255)
+
+	 update [Cisco Report].dbo.Formula_REQ  
+		set [Cisco Report].dbo.Formula_REQ.[Request State1] = 
+		(select [New request state1] from [Cisco Report].dbo.b17 
+		where [Cisco Report].dbo.b17.Request = [Cisco Report].dbo.Formula_REQ.Request)
+
+	 alter table [Cisco Report].dbo.Formula_REQ --19
+	 add [Report Date] datetime
+
+	 update [Cisco Report].dbo.Formula_REQ  
+		set [Cisco Report].dbo.Formula_REQ.[Report Date] = [Cisco Report].dbo.Formula_REQ$.[Report Date]
+		from [Cisco Report].dbo.Formula_REQ$
+
+	 alter table [Cisco Report].dbo.Formula_REQ --20
+	 add C_System_Incomplete_Del_Age float
+
+	 Alter table [Cisco Report].dbo.Formula_REQ 
+	 Add newdeliverydate datetime;
+
+	 update [Cisco Report].dbo.Formula_REQ 
+	 set newdeliverydate = [Delivery Date] + 2
+	 where DATEPART(dw, [Delivery Date]) = 7
+
+	 update [Cisco Report].dbo.Formula_REQ 
+	 set newdeliverydate = [Delivery Date] + 1
+	 where DATEPART(dw, [Delivery Date]) = 1
+
+	 update [Cisco Report].dbo.Formula_REQ 
+	 set newdeliverydate = [Delivery Date]
+	 where newdeliverydate is null
+
+	 update [Cisco Report].dbo.Formula_REQ  
+		set [Cisco Report].dbo.Formula_REQ.C_System_Incomplete_Del_Age = 
+	 DATEDIFF(dd, newdeliverydate, [Report Date]) 
+		- (DATEDIFF(ww, newdeliverydate, [Report Date]) * 2)
+		- (SELECT Count(*) FROM [Cisco Report].dbo.holidaydate as h WHERE (ph_date BETWEEN newdeliverydate AND [Report Date])
+	  AND DATEPART(Dw, ph_date) not in (1,7) AND h.country_id = main.Country2) 
+	 From [Cisco Report].dbo.Formula_REQ as main  
+
+
+	 alter table [Cisco Report].dbo.Formula_REQ --21
+	 add [C_Incomplete_Del_Status >10] float
+
+	 update [Cisco Report].dbo.Formula_REQ  
+		set [Cisco Report].dbo.Formula_REQ.[C_Incomplete_Del_Status >10] = 
+		CASE
+			WHEN [C_System_Incomplete_Del_Age] > 10 THEN '1'
+			WHEN [C_System_Incomplete_Del_Age] <= 10 THEN '0'
+			ELSE NULL
+	END 
+	FROM [Cisco Report].dbo.Formula_REQ
+
+	 alter table [Cisco Report].dbo.Formula_REQ --22
+	 add ShipDate_Aging float
+
+	 Alter table [Cisco Report].dbo.Formula_REQ 
+	 Add newshipdate datetime;
+
+	 update [Cisco Report].dbo.Formula_REQ 
+	 set newshipdate = [Ship Date] + 2
+	 where DATEPART(dw, [Ship Date]) = 7
+
+	 update [Cisco Report].dbo.Formula_REQ 
+	 set newshipdate = [Ship Date] + 1
+	 where DATEPART(dw, [Ship Date]) = 1
+
+	 update [Cisco Report].dbo.Formula_REQ 
+	 set newshipdate = [Ship Date]
+	 where newshipdate is null
+
+	 update [Cisco Report].dbo.Formula_REQ  
+		set [Cisco Report].dbo.Formula_REQ.ShipDate_Aging = 
+		DATEDIFF(dd, newshipdate, [Report Date]) 
+		- (DATEDIFF(ww, newshipdate, [Report Date]) * 2)
+		- (SELECT Count(*) FROM [Cisco Report].dbo.holidaydate as h WHERE (ph_date BETWEEN newshipdate AND [Report Date])
+	  AND DATEPART(Dw, ph_date) not in (1,7) AND h.country_id = main.Country2) 
+	 From [Cisco Report].dbo.Formula_REQ as main  
+
+
+	 alter table [Cisco Report].dbo.Formula_REQ --23 
+	 add [Mismatched Serial Number] bit
+
+	 --update [Cisco Report].dbo.Formula_REQ 
+	 --set [Mismatched Serial Number] = 'TRUE'
+	 --where [PCaas serial number] = [Serial Number] and [Mismatched Serial Number] is null
+
+	 --select Request, [Serial Number], [PCaas serial number], [Mismatched Serial Number] from [Cisco Report].dbo.Formula_REQ 
+	 --where Request = 'REQ0035528'
+	 update [Cisco Report].dbo.Formula_REQ 
+	 set [Mismatched Serial Number] = 'TRUE'
+	 where [PCaas serial number] = [Serial Number] or left(trim([PCaas serial number]), 4) = 'SC02' and left([Serial Number], 12) = right (trim([PCaas serial number]), 12)
+	 or left([Serial Number], 3) = 'C02' and left([Serial Number], 12) = left (trim([PCaas serial number]), 12)
+ 
+	 update [Cisco Report].dbo.Formula_REQ 
+	 set [Mismatched Serial Number] = 'FALSE'
+	 where [PCaas serial number] != [Serial Number] and [Mismatched Serial Number] is null
+
+
+	 alter table [Cisco Report].dbo.Formula_REQ --24 --need attention
+	 add [COA > 2 Days] float
+
+	 Alter table [Cisco Report].dbo.Formula_REQ 
+	 Add newrejectioncoacreated datetime;
+
+	 update [Cisco Report].dbo.Formula_REQ 
+	 set newrejectioncoacreated = [Rejection COA Created] + 2
+	 where DATEPART(dw, [Rejection COA Created]) = 7
+
+	 update [Cisco Report].dbo.Formula_REQ 
+	 set newrejectioncoacreated = [Rejection COA Created] + 1
+	 where DATEPART(dw, [Rejection COA Created]) = 1
+
+	 update [Cisco Report].dbo.Formula_REQ 
+	 set newrejectioncoacreated = [Rejection COA Created]
+	 where newrejectioncoacreated is null
+
+	 update [Cisco Report].dbo.Formula_REQ  
+		set [Cisco Report].dbo.Formula_REQ.[COA > 2 Days] = 
+		DATEDIFF(dd, newrejectioncoacreated, [Report Date]) 
+		- (DATEDIFF(ww, newrejectioncoacreated, [Report Date]) * 2)
+		- (SELECT Count(*) FROM [Cisco Report].dbo.holidaydate as h WHERE (ph_date BETWEEN newrejectioncoacreated AND [Report Date])
+	  AND DATEPART(Dw, ph_date) not in (1,7) AND h.country_id = main.Country2) 
+	 From [Cisco Report].dbo.Formula_REQ as main 
+
+	 update [Cisco Report].dbo.Formula_REQ  
+		set [Cisco Report].dbo.Formula_REQ.[COA > 2 Days] = 
+		CASE
+			WHEN [COA > 2 Days] > 2 THEN '1'
+			WHEN [COA > 2 Days] <= 2 THEN '0'
+			ELSE null
+	END 
+	FROM [Cisco Report].dbo.Formula_REQ
+
+	 alter table [Cisco Report].dbo.Formula_REQ --25
+	 add [C_System_Incomplete_Del_Aging Bucket] nvarchar(255)
+
+	 update [Cisco Report].dbo.Formula_REQ  
+		set [Cisco Report].dbo.Formula_REQ.[C_System_Incomplete_Del_Aging Bucket] =
+		CASE
+			WHEN [C_System_Incomplete_Del_Age] > 20 THEN '21 Days+'
+			WHEN [C_System_Incomplete_Del_Age] > 15 THEN '16 - 20 Days'
+			WHEN [C_System_Incomplete_Del_Age] > 10 THEN '11 - 15 Days'
+			ELSE null
+	END 
+	FROM [Cisco Report].dbo.Formula_REQ
+
+	 alter table [Cisco Report].dbo.Formula_REQ --26 
+	 add Client_Incomplete_Delivery float
+
+	 update [Cisco Report].dbo.Formula_REQ  
+		set [Cisco Report].dbo.Formula_REQ.Client_Incomplete_Delivery =
+		CASE
+			WHEN [Tracking Number] is not null and [Ship Date] is not null and [C_Incomplete_Del_Status >10] = '1' THEN '1'
+			ELSE '0'
+	END 
+	FROM [Cisco Report].dbo.Formula_REQ
+
+
+	 alter table [Cisco Report].dbo.Formula_REQ --27 
+	 add [Aging in Shipped Status] bit
+
+		update [Cisco Report].dbo.Formula_REQ
+		set [Aging in Shipped Status] = '1'
+	where [Delivery Date] is null and [Ship Date] is not null and ShipDate_Aging > 5 
+
+	update [Cisco Report].dbo.Formula_REQ
+		set [Aging in Shipped Status] = '0'
+	where [Aging in Shipped Status] is null and [Delivery Date] is not null and [Ship Date] is not null 
+
+	 alter table [Cisco Report].dbo.Formula_REQ --28 
+	 add [ShipDate_Aging Bucket] nvarchar(255)
+
+	 update [Cisco Report].dbo.Formula_REQ
+		set [ShipDate_Aging Bucket] =
+	 CASE
+			WHEN ShipDate_Aging >15 THEN '> 15 Days'
+			WHEN ShipDate_Aging >10 THEN '11 - 15 Days'
+			WHEN ShipDate_Aging >5 THEN '6 - 10 Days'
+			ELSE '< 5 Days'
+	END 
+	FROM [Cisco Report].dbo.Formula_REQ
+
+	 alter table [Cisco Report].dbo.Formula_REQ --29
+	 add [Week] nvarchar(255)
+
+	 update [Cisco Report].dbo.Formula_REQ  
+		set [Cisco Report].dbo.Formula_REQ.[Week] = 
+		DATEPART(Week, [Report Date]) -1
+	from [Cisco Report].dbo.Formula_REQ
+
+	 alter table [Cisco Report].dbo.Formula_REQ --30 
+	 add [Dup Date] bit
+
+	 update [Cisco Report].dbo.Formula_REQ 
+    set [Cisco Report].dbo.Formula_REQ.[Dup Date] = 'TRUE'
+	where Request != 'REQ0060299' --find the bottom request in excel formula request
+
+	update [Cisco Report].dbo.Formula_REQ 
+    set [Cisco Report].dbo.Formula_REQ.[Dup Date] = 'FALSE'
+	where Request = 'REQ0060299'
+
+	 alter table [Cisco Report].dbo.Formula_REQ --31
+	 add [COA Days] float
+
+	 update [Cisco Report].dbo.Formula_REQ  
+		set [Cisco Report].dbo.Formula_REQ.[COA Days] = 
+		DATEDIFF(dd, newrejectioncoacreated, [Report Date]) 
+		- (DATEDIFF(ww, newrejectioncoacreated, [Report Date]) * 2)
+		- (SELECT Count(*) FROM [Cisco Report].dbo.holidaydate as h WHERE (ph_date BETWEEN newrejectioncoacreated AND [Report Date])
+	  AND DATEPART(Dw, ph_date) not in (1,7) AND h.country_id = main.Country2) 
+	 From [Cisco Report].dbo.Formula_REQ as main  
+
+	 alter table [Cisco Report].dbo.Formula_REQ --32
+	 add [COA > 5 Days] nvarchar(255)
+
+	 update [Cisco Report].dbo.Formula_REQ  
+		set [Cisco Report].dbo.Formula_REQ.[COA > 5 Days] = 
+		CASE
+			WHEN [COA Days] > 10 THEN '1'
+			WHEN [COA Days] < 10 THEN '0'
+			ELSE null
+	END 
+	FROM [Cisco Report].dbo.Formula_REQ	
+
+	 alter table [Cisco Report].dbo.Formula_REQ --33 
+	 add Delivery_Date_Summary float
+
+	 update [Cisco Report].dbo.Formula_REQ  
+		set [Cisco Report].dbo.Formula_REQ.Delivery_Date_Summary = 
+		CASE
+			WHEN [Delivery Date] is not null THEN '1'
+			ELSE '0'
+	END 
+	FROM [Cisco Report].dbo.Formula_REQ
+
+	 alter table [Cisco Report].dbo.Formula_REQ --34 --Error converting data type varchar to float.
+	 add Track_Summary float
+
+	 update [Cisco Report].dbo.Formula_REQ
+		set Track_Summary = '1'
+	where [Tracking Number] is not null 
+
+	 alter table [Cisco Report].dbo.Formula_REQ --35
+	 add [New Hire Aging] nvarchar(255)
+
+	 Alter table [Cisco Report].dbo.Formula_REQ 
+	 Add newhirestartdate datetime;
+	 
+	 update [Cisco Report].dbo.Formula_REQ
+	 set newhirestartdate = [New Hire Start Date] + 2
+	 where DATEPART(dw, [New Hire Start Date]) = 7
+
+	 update [Cisco Report].dbo.Formula_REQ 
+	 set newhirestartdate = [New Hire Start Date] + 1
+	 where DATEPART(dw, [New Hire Start Date]) = 1
+
+	 update [Cisco Report].dbo.Formula_REQ
+	 set newhirestartdate = [New Hire Start Date]
+	 where newhirestartdate is null
+
+	 update [Cisco Report].dbo.Formula_REQ  
+		set [Cisco Report].dbo.Formula_REQ.[New Hire Aging] = 
+		DATEDIFF(dd, newhirestartdate, [Report Date]) 
+		- (DATEDIFF(ww, newhirestartdate, [Report Date]) * 2)
+		- (SELECT Count(*) FROM [Cisco Report].dbo.holidaydate as h WHERE (ph_date BETWEEN newhirestartdate AND [Report Date])
+	  AND DATEPART(Dw, ph_date) not in (1,7) AND h.country_id = main.Country2) 
+	  + (SELECT Count(*) FROM [Cisco Report].dbo.holidaydate as h WHERE (ph_date BETWEEN [Report Date] AND newhirestartdate)
+	  AND DATEPART(Dw, ph_date) not in (1,7) AND h.country_id = main.Country2)
+	 From [Cisco Report].dbo.Formula_REQ as main 
+
+	 Select Request, Country2, [New Hire Start Date], newhirestartdate, [Report Date], [New Hire Aging]  from [Cisco Report].dbo.Formula_REQ 
+	 where [New Hire Aging] is not null and newhirestartdate != [New Hire Start Date]  order by Request ASC 
+
+	 alter table [Cisco Report].dbo.Formula_REQ --36
+	 add [New Hire Aging Criteria] nvarchar(255)
+
+	 update [Cisco Report].dbo.Formula_REQ
+	set [New Hire Aging Criteria] = 'More than 5 days before due'
+	where [New Hire Aging] < -7
+
+	update [Cisco Report].dbo.Formula_REQ
+	set [New Hire Aging Criteria] = '0 - 5 days before due'
+	where [New Hire Aging] < 1 and [New Hire Aging Criteria] is null
+
+	update [Cisco Report].dbo.Formula_REQ 
+	 set [New Hire Aging Criteria] = '≥ 1 days overdue'
+	 where [New Hire Aging] > 0 and [New Hire Aging Criteria] is null
+
+	 update [Cisco Report].dbo.Formula_REQ 
+	 set [New Hire Aging Criteria] = null
+	 where [New Hire Aging] is null and [New Hire Aging Criteria] is null
+
+	 alter table [Cisco Report].dbo.Formula_REQ --37
+	 add [Asset Aging] float
+
+	 Alter table [Cisco Report].dbo.Formula_REQ  
+	 Add newassetcreateddate datetime;
+
+	 update [Cisco Report].dbo.Formula_REQ
+	 set newassetcreateddate = [Asset Created Date] + 2
+	 where DATEPART(dw, [Asset Created Date]) = 7
+
+	 update [Cisco Report].dbo.Formula_REQ 
+	 set newassetcreateddate = [Asset Created Date] + 1
+	 where DATEPART(dw, [Asset Created Date]) = 1
+
+	 update [Cisco Report].dbo.Formula_REQ 
+	 set newassetcreateddate = [Asset Created Date]
+	 where newassetcreateddate is null
+
+	 update [Cisco Report].dbo.Formula_REQ 
+	 set [Asset Aging] =
+	 DATEDIFF(dd, newassetcreateddate, [Report Date]) 
+		- (DATEDIFF(ww, newassetcreateddate, [Report Date]) * 2)
+		- (SELECT Count(*) FROM [Cisco Report].dbo.holidaydate as h WHERE (ph_date BETWEEN newassetcreateddate AND [Report Date])
+	  AND DATEPART(Dw, ph_date) not in (1,7) AND h.country_id = main.Country2)
+	 From [Cisco Report].dbo.Formula_REQ as main  
+
+	 alter table [Cisco Report].dbo.Formula_REQ --38
+	 add [Asset Aging Range] nvarchar(255)
+
+	 update [Cisco Report].dbo.Formula_REQ 
+	 set [Asset Aging Range] =
+	 CASE
+			WHEN [Asset Aging] > 4 THEN 'More than 4 days'
+			WHEN [Asset Aging] < 5 THEN 'within 4 days'
+			ELSE '-'
+	END 
+	FROM [Cisco Report].dbo.Formula_REQ
+
+	 alter table [Cisco Report].dbo.Formula_REQ --39
+	 add [Delivery 4 Days] float
+
+	 update [Cisco Report].dbo.Formula_REQ 
+	 set [Delivery 4 Days] =
+	 DATEDIFF(dd, newassetcreateddate, newdeliverydate) 
+		- (DATEDIFF(ww, newassetcreateddate, newdeliverydate) * 2)
+		- (SELECT Count(*) FROM [Cisco Report].dbo.holidaydate as h WHERE (ph_date BETWEEN newassetcreateddate AND newdeliverydate)
+		AND DATEPART(Dw, ph_date) not in (1,7) AND h.country_id = main.Country2)
+		+ (SELECT Count(*) FROM [Cisco Report].dbo.holidaydate as h WHERE (ph_date BETWEEN newdeliverydate AND newassetcreateddate)
+	  AND DATEPART(Dw, ph_date) not in (1,7) AND h.country_id = main.Country2) 
+		From [Cisco Report].dbo.Formula_REQ as main
+
+		update [Cisco Report].dbo.Formula_REQ 
+	 set [Delivery 4 Days] = 0
+	 where [Delivery 4 Days] < 0
+
+	 alter table [Cisco Report].dbo.Formula_REQ --40
+	 add [Delivery 4 Days Aging Range] nvarchar(255)
+
+	 update [Cisco Report].dbo.Formula_REQ 
+	 set [Delivery 4 Days Aging Range] =
+	 CASE
+			WHEN [Delivery 4 Days] > 4 THEN '>4 Days'
+			WHEN [Delivery 4 Days] <= 4 THEN '<4 days'
+			ELSE null
+	END
+	FROM [Cisco Report].dbo.Formula_REQ
+
+	alter table [Cisco Report].dbo.Formula_REQ --41 
+	 add [No Delivery Date] float
+
+	 update [Cisco Report].dbo.Formula_REQ 
+	 set [No Delivery Date] =
+	 CASE
+			WHEN [Delivery Date] is null THEN '1'
+			ELSE '0'
+	END 
+	FROM [Cisco Report].dbo.Formula_REQ
+
+	 alter table [Cisco Report].dbo.Formula_REQ --42
+	 add [Asset Request State (Open, WIP)] bit
+
+	 update [Cisco Report].dbo.Formula_REQ --run this first step and run again after finish run the second step
+	 set [Asset Request State (Open, WIP)] = 'TRUE'
+	 where [Request State] = 'Open' or [Request State] = 'Work In Progress'
+
+	 update [Cisco Report].dbo.Formula_REQ --run this second step
+	 set [Asset Request State (Open, WIP)] = 'FALSE'
+	 where [Request State] != 'Open' or [Request State] != 'Work In Progress' and [Asset Request State (Open, WIP)] is null
+
+	 alter table [Cisco Report].dbo.Formula_REQ --43
+	 add [Rejection Reason (POD,DOA)] nvarchar(255)
+
+	 update [Cisco Report].dbo.Formula_REQ 
+	 set [Rejection Reason (POD,DOA)] =
+	 CASE
+			WHEN [Rejection Reason] = 'Wrong Device' THEN 'Wrong Device'
+			WHEN [Rejection Reason] = 'DOA' THEN 'Hardware Issue – DOA'
+			WHEN [Rejection Reason] = 'POD' THEN 'Delivery Issue – POD'
+			ELSE null
+	END 
+	FROM [Cisco Report].dbo.Formula_REQ
+
+	 alter table [Cisco Report].dbo.Formula_REQ --44 
+	 add [New Hire Delivery Date (Blank, #N/A)] float
+
+	 update [Cisco Report].dbo.Formula_REQ 
+	 set [New Hire Delivery Date (Blank, #N/A)] = 
+	 CASE
+			WHEN [Delivery Date] is null THEN '1'
+			ELSE '0'
+	END 
+	FROM [Cisco Report].dbo.Formula_REQ
+
+	 alter table [Cisco Report].dbo.Formula_REQ --45
+	 add [New Hire Start Date Only] float
+
+	 update [Cisco Report].dbo.Formula_REQ 
+	 set [New Hire Start Date Only] = 
+	 CASE
+			WHEN [New Hire Start Date] is null THEN 0
+			ELSE 1
+	END 
+	FROM [Cisco Report].dbo.Formula_REQ
+
+	 alter table [Cisco Report].dbo.Formula_REQ --46
+	 add [New Hire Criteria] nvarchar(255)
+
+	 update [Cisco Report].dbo.Formula_REQ 
+	 set [New Hire Criteria] = 
+	 CASE
+			WHEN [New Hire Aging Criteria] = '0 - 5 days before due' THEN '0 - 5 days before due'
+			WHEN [New Hire Aging Criteria] = '≥ 1 days overdue' THEN '≥ 1 days overdue'
+			WHEN [New Hire Aging Criteria] = 'More than 5 days before due' THEN 'More than 5 days before due'
+			ELSE '-'
+	END 
+	FROM [Cisco Report].dbo.Formula_REQ
+
+	 alter table [Cisco Report].dbo.Formula_REQ --47
+	 add [Overall Count Days (Rejection)] nvarchar(255)
+
+	 update [Cisco Report].dbo.Formula_REQ 
+	 set [Overall Count Days (Rejection)] = 
+	 CASE
+			WHEN [Asset Aging] > 30 THEN '31 Days+'
+			WHEN [Asset Aging] > 20 THEN '21 - 30 Days'
+			WHEN [Asset Aging] > 15 THEN '16 - 20 Days'
+			WHEN [Asset Aging] > 10 THEN '11 - 15 Days'
+			WHEN [Asset Aging] > 0 THEN '0 - 10 Days'
+			ELSE '-'
+	END 
+	FROM [Cisco Report].dbo.Formula_REQ
+
+	 alter table [Cisco Report].dbo.Formula_REQ --48 
+	 add [After 10 Days POD] datetime
+
+	 update [Cisco Report].dbo.Formula_REQ 
+	 set [After 10 Days POD] = 
+	 DATEADD(DW,14, [Delivery Date]) 
+from [Cisco Report].dbo.Formula_REQ 
+
+Select Datename(dw, [Delivery Date]), [Delivery Date] from [Cisco Report].dbo.Formula_REQ 
+
+
+	 alter table [Cisco Report].dbo.Formula_REQ --49 --formulareq punya problem --accepted day
+	 add [Accepted day] float
+
+	 Alter table [Cisco Report].dbo.Formula_REQ  
+	 Add newafter10daysdate datetime;
+
+	 update [Cisco Report].dbo.Formula_REQ 
+	 set newafter10daysdate = [After 10 Days POD] + 2
+	 where DATEPART(dw, [After 10 Days POD]) = 7
+
+	 update [Cisco Report].dbo.Formula_REQ 
+	 set newafter10daysdate = [After 10 Days POD] + 1
+	 where DATEPART(dw, [After 10 Days POD]) = 1
+
+	 update [Cisco Report].dbo.Formula_REQ
+	 set newafter10daysdate = [After 10 Days POD]
+	 where newafter10daysdate is null
+
+	 update [Cisco Report].dbo.Formula_REQ 
+	 set [Accepted day] = 
+	 DATEDIFF(dd, newafter10daysdate, [Report Date]) 
+		- (DATEDIFF(ww, newafter10daysdate, [Report Date]) * 2)
+		- (SELECT Count(*) FROM [Cisco Report].dbo.holidaydate as h WHERE (ph_date BETWEEN newafter10daysdate AND [Report Date])
+	  AND DATEPART(Dw, ph_date) not in (1,7) AND h.country_id = main.Country2) 
+	 From [Cisco Report].dbo.Formula_REQ as main  
+
+	 select Request, [After 10 Days POD], [Report Date], [Accepted day] from [Cisco Report].dbo.Formula_REQ  
+	 where [Accepted day] < 0
+	 order by Request ASC
+
+	 update [Cisco Report].dbo.Formula_REQ 
+	 set [Accepted day] = 0
+	 where [Accepted day] < 0
+	 
+	 alter table [Cisco Report].dbo.Formula_REQ --50
+	 add [POD Delivery Days] float
+
+	 update [Cisco Report].dbo.Formula_REQ 
+	 set [POD Delivery Days] = 
+	 DATEDIFF(dd, newdeliverydate, [Report Date]) 
+		- (DATEDIFF(ww, newdeliverydate, [Report Date]) * 2)
+		- (SELECT Count(*) FROM [Cisco Report].dbo.holidaydate as h WHERE (ph_date BETWEEN newdeliverydate AND [Report Date])
+	  AND DATEPART(Dw, ph_date) not in (1,7) AND h.country_id = main.Country2)
+	 From [Cisco Report].dbo.Formula_REQ as main  
+
+	 alter table [Cisco Report].dbo.Formula_REQ --51
+	 add [POD Delivery Aging] nvarchar(255)
+
+	 update [Cisco Report].dbo.Formula_REQ 
+	 set [POD Delivery Aging] = 
+	 CASE
+			WHEN [POD Delivery Days] > 30 THEN '31 Days+'
+			WHEN [POD Delivery Days] > 20 THEN '21 - 30 Days'
+			WHEN [POD Delivery Days] > 15 THEN '16 - 20 Days'
+			WHEN [POD Delivery Days] > 10 THEN '11 - 15 Days'
+			WHEN [POD Delivery Days] > 0 THEN '0 - 10 Days'
+			ELSE '-'
+	END 
+	FROM [Cisco Report].dbo.Formula_REQ
+
+
+	 alter table [Cisco Report].dbo.Formula_REQ --52 --Error converting data type varchar to float.
+	 add [Acceptance Status (Blank)] float
+
+	 update [Cisco Report].dbo.Formula_REQ
+		set [Acceptance Status (Blank)] = '0'
+	where [Acceptance Status] != null or [Acceptance Status] != '0'
+
+	update [Cisco Report].dbo.Formula_REQ
+		set [Acceptance Status (Blank)] = '1'
+	where [Acceptance Status] = '0' 
+
+	 alter table [Cisco Report].dbo.Formula_REQ --53
+	 add [Closed Asset Request State] nvarchar(255)
+
+	 update [Cisco Report].dbo.Formula_REQ 
+	 set [Closed Asset Request State] =
+	 CASE
+			WHEN [Request State] = 'Open' THEN 'Open'
+			WHEN [Request State] = 'Closed Complete' THEN 'Closed'
+			WHEN [Request State] = 'Closed Incomplete' THEN 'Closed'
+			WHEN [Request State] = 'Pending for Billing' THEN 'Open'
+			WHEN [Request State] = 'Work in Progress' THEN 'Open'
+			ELSE null
+	END 
+	FROM [Cisco Report].dbo.Formula_REQ
+
+	 alter table [Cisco Report].dbo.Formula_REQ --54 
+	 add [Accepted Day (exclude 0, NA)] bit
+
+	 update [Cisco Report].dbo.Formula_REQ 
+	 set [Accepted Day (exclude 0, NA)] = 'FALSE'
+	 where [Accepted day] is null
+
+	 update [Cisco Report].dbo.Formula_REQ 
+	 set [Accepted Day (exclude 0, NA)] = 'TRUE'
+	 where [Accepted day] is not null 
+	 
+	 select Request, [Accepted day], [Accepted Day (exclude 0, NA)] from [2nd try].dbo.Formula_REQ order by Request ASC
+
+	 alter table [Cisco Report].dbo.Formula_REQ --55
+	 add [CISCO Customer Delivery (Excluded)] float
+
+	 update [Cisco Report].dbo.Formula_REQ 
+	 set [CISCO Customer Delivery (Excluded)] =
+	 CASE
+			WHEN [Customer Delivery status] = 'Delivered - Complete' THEN 1
+			WHEN [Customer Delivery status] = 'NA' THEN 1
+			ELSE 0
+	END 
+	FROM [Cisco Report].dbo.Formula_REQ
+
+	 alter table [Cisco Report].dbo.Formula_REQ --56
+	 add [Unfinal PCaaS SN1] nvarchar(255)
+
+	 update [Cisco Report].dbo.Formula_REQ 
+	 set [Unfinal PCaaS SN1] =
+	 (select [new final sn] from [Cisco Report].dbo.b19 
+		where [Cisco Report].dbo.b19.Request = [Cisco Report].dbo.Formula_REQ.Request)
+
+	 alter table [Cisco Report].dbo.Formula_REQ --57
+	 add [Unfinal PCaaS Mismatched] bit
+
+	 update [Cisco Report].dbo.Formula_REQ 
+	 set [Unfinal PCaaS Mismatched] = 'TRUE'
+	 where [Unfinal PCaaS SN1] = [Serial Number]
+
+	 update [Cisco Report].dbo.Formula_REQ 
+	 set [Unfinal PCaaS Mismatched] = 'FALSE'
+	 where [Unfinal PCaaS SN1] != [Serial Number]
+
+			select Request, [Serial Number], [Unfinal PCaaS SN1], [Unfinal PCaaS Mismatched] from [Cisco Report].dbo.Formula_REQ where [Unfinal PCaaS Mismatched] = '0'
+
+	 alter table [Cisco Report].dbo.Formula_REQ --58
+	 add [New Hire 5 Days+ Age] nvarchar(255)
+
+	 update [Cisco Report].dbo.Formula_REQ 
+	set [New Hire 5 Days+ Age] = '≥ 5 days overdue'
+	where [New Hire Aging] > 4
+
+	select Request, [New Hire Aging], [New Hire 5 Days+ Age] from [Cisco Report].dbo.Formula_REQ order by Request ASC
+
+	 alter table [Cisco Report].dbo.Formula_REQ --59
+	 add [Ship Date1] float
+
+	 update [Cisco Report].dbo.Formula_REQ 
+	set [Ship Date1] =
+	CASE
+			WHEN [Ship Date] is null THEN '0'
+			WHEN [Ship Date] is not null THEN '1'
+			ELSE null
+	END
+	FROM [Cisco Report].dbo.Formula_REQ
+
+	 alter table [Cisco Report].dbo.Formula_REQ --60
+	 add [Delivery date 2] datetime
+
+	 update [Cisco Report].dbo.Formula_REQ 
+	set [Delivery date 2] =
+	(select [new final delivery date] from [Cisco Report].dbo.b20 
+		where [Cisco Report].dbo.b20.Request = [Cisco Report].dbo.Formula_REQ.Request)
+
+	alter table [Cisco Report].dbo.Formula_REQ --61
+	 add [Created Days] float
+
+	 Alter table [Cisco Report].dbo.Formula_REQ  
+	 Add newcreateddate datetime;
+
+	 update [Cisco Report].dbo.Formula_REQ 
+	 set newcreateddate = Created + 2
+	 where DATEPART(dw, Created) = 7
+
+	 update [Cisco Report].dbo.Formula_REQ 
+	 set newcreateddate = Created + 1
+	 where DATEPART(dw, Created) = 1
+
+	 update [Cisco Report].dbo.Formula_REQ 
+	 set newcreateddate = Created
+	 where newcreateddate is null
+
+
+	 update [Cisco Report].dbo.Formula_REQ 
+	set [Created Days] =
+	DATEDIFF(dd, newcreateddate, [Report Date]) 
+		- (DATEDIFF(ww, newcreateddate, [Report Date]) * 2)
+		- (SELECT Count(*) FROM [Cisco Report].dbo.holidaydate as h WHERE (ph_date BETWEEN newcreateddate AND [Report Date])
+	  AND DATEPART(Dw, ph_date) not in (1,7) AND h.country_id = main.Country2) 
+	 From [Cisco Report].dbo.Formula_REQ as main  
+
+	 alter table [Cisco Report].dbo.Formula_REQ --62 
+	 add SLA float
+
+	 update [Cisco Report].dbo.Formula_REQ 
+	set SLA =
+	(select SLA from [Cisco Report].dbo.b21 
+		where [Cisco Report].dbo.b21.Country2 = [Cisco Report].dbo.Formula_REQ.Country2)
+
+	 alter table [Cisco Report].dbo.Formula_REQ --63 
+	 add [Miss SLA] float
+
+	 update [Cisco Report].dbo.Formula_REQ 
+	set [Miss SLA] =
+	(select [New Miss SLA] from [Cisco Report].dbo.b22 
+		where [Cisco Report].dbo.b22.Request = [Cisco Report].dbo.Formula_REQ.Request)
+
+
+	 alter table [Cisco Report].dbo.Formula_REQ --64 
+	 add [New Hire SLA bucket] nvarchar(255)
+
+	 update [Cisco Report].dbo.Formula_REQ 
+	set [New Hire SLA bucket] =
+	 CASE
+			WHEN [Miss SLA] < 1 THEN 'In Progress'
+			ELSE 'Overdue SLA'
+	END 
+	FROM [Cisco Report].dbo.Formula_REQ
+
+	 alter table [Cisco Report].dbo.Formula_REQ --65
+	 add [5 Days+ Overdue] nvarchar(255)
+
+	  update [Cisco Report].dbo.Formula_REQ 
+	set [5 Days+ Overdue] =
+	CASE
+			WHEN [New Hire SLA bucket] = 'Overdue SLA' AND [Miss SLA] > 4 THEN '5 Days+ Overdue'
+			ELSE '-'
+	END 
+	FROM [Cisco Report].dbo.Formula_REQ
+
+
