@@ -1,0 +1,91 @@
+--Delete Data in all DB when want generate new report--
+delete from [Cisco Report].dbo.['Asset Report$']
+delete from [Cisco Report].dbo.Bundle$ 
+delete from [Cisco Report].dbo.['Cisco report$'] 
+delete from [Cisco Report].dbo.['COA Rejection$'] 
+delete from [Cisco Report].dbo.Formula_REQ$ 
+delete from [Cisco Report].dbo.Formula_TASK$ 
+delete from [Cisco Report].dbo.IndexMatch_REQ$ 
+delete from [Cisco Report].dbo.IndexMatch_TaskReport$ 
+delete from [Cisco Report].dbo.['Manul Delivery date$'] 
+delete from [Cisco Report].dbo.PCaaS$ 
+delete from [Cisco Report].dbo.['SN_Sujo corrected$'] 
+delete from [Cisco Report].dbo.['Task Report$'] 
+--run all above to remove data inside the db, as i already remove data inside each table. i proceed to import need data into the table
+--need to wait for a few minutes
+
+--when all succesfully then i validate the data with below sql code, compare it with excel
+Select * from [Cisco Report].dbo.['Asset Report$'] --correct with Excel
+delete from [Cisco Report].dbo.['Asset Report$']
+where [Report Date] is NULL
+
+Select * from [Cisco Report].dbo.Bundle$ --correct with Excel
+delete from [Cisco Report].dbo.Bundle$
+where [Report Date] is NULL
+
+Select * from [Cisco Report].dbo.['Cisco report$'] --correct with Excel
+delete from [Cisco Report].dbo.['Cisco report$'] 
+where [Report Date] is NULL
+
+Select * from [Cisco Report].dbo.['Cisco SLA$'] --extra code compare to Excel but no code dup
+delete from [Cisco Report].dbo.['Cisco SLA$']
+where Code is NULL
+
+Select * from [Cisco Report].dbo.['COA Rejection$'] --correct with Excel
+delete from [Cisco Report].dbo.['COA Rejection$']
+where [Report Date] is NULL
+
+Select * from [Cisco Report].dbo.Comment$ --correct with Excel
+delete from [Cisco Report].dbo.Comment$
+where Request is NULL
+
+Select * from [Cisco Report].dbo.Formula_REQ$ --correct with Excel
+delete from [Cisco Report].dbo.Formula_REQ$
+where Request is NULL
+
+Select * from [Cisco Report].dbo.Formula_TASK$ 
+order by RequestID ASC--correct with Excel
+delete from [Cisco Report].dbo.Formula_TASK$
+where Number2 is NULL
+
+Select * from [Cisco Report].dbo.['Holiday List$'] --correct with Excel
+delete from [Cisco Report].dbo.['Holiday List$']
+where Date is NULL
+
+Select * from [Cisco Report].dbo.Holidays$ --no really a need since we use holidaydate
+delete from [Cisco Report].dbo.Holidays$
+where [Report Date] is NULL
+
+Select * from [Cisco Report].dbo.IndexMatch_REQ$ --correct with Excel
+delete from [Cisco Report].dbo.IndexMatch_REQ$
+where Request is NULL
+
+Select * from [Cisco Report].dbo.IndexMatch_TaskReport$ --correct with Excel
+delete from [Cisco Report].dbo.IndexMatch_TaskReport$
+where Number2 is NULL
+
+Select * from [Cisco Report].dbo.['Manul Delivery date$'] --correct with Excel
+delete from [Cisco Report].dbo.['Manul Delivery date$']
+where Request is NULL
+
+Select * from [Cisco Report].dbo.PCaaS$ --correct with Excel
+delete from [Cisco Report].dbo.PCaaS$
+where [Report Date] is NULL
+
+Select * from [Cisco Report].dbo.country --correct with Excel
+delete from [Cisco Report].dbo.Sheet1$
+where Code is NULL
+
+Select * from [Cisco Report].dbo.['SN_Sujo corrected$'] --correct with Excel
+delete from [Cisco Report].dbo.['SN_Sujo corrected$']
+where [Report Date] is NULL
+
+Select * from [Cisco Report].dbo.holidaydate --correct with Excel
+delete from [Cisco Report].dbo.holidaydate
+where [Report Date] is NULL
+
+Select * from [Cisco Report].dbo.['Task Report$'] --correct with Excel
+delete from [Cisco Report].dbo.['Task Report$']
+where Number2 is NULL
+
+--when all good then open formula task file
