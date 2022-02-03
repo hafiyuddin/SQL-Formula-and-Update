@@ -1,0 +1,257 @@
+																--Formula Task Completed--
+														   --Update Daily Formula Task Report--
+
+select * from [Cisco Report].dbo.Formula_TASK$
+select * from [Cisco Report].dbo.Formula_TASK_Completed order by RequestID ASC
+
+Insert into [Cisco Report].dbo.Formula_TASK_Completed (RequestID, [Report Date], Number2, Request, [External Request Number], Company, Created , 
+[Task Number State(state)], [Short description], [Partner Order Number], [ECC Order Number], YVAS, Quantity, [Request Type], [Country ID], GEO)
+select RequestID, [Report Date], Number2, Request, [External Request Number], Company, Created , [Task Number State(state)], 
+[Short description], [Partner Order Number], [ECC Order Number], YVAS, Quantity, [Request Type], [Country ID], GEO
+from [Cisco Report].dbo.Formula_TASK$ 
+ORDER BY RequestID ASC --then run this code to get the latest data
+
+--select RequestID, [Report Date], Number2, Request, [External Request Number], Company, Created , 
+--[Task Number State(state)], [Short description], [Partner Order Number], [ECC Order Number], YVAS, Quantity, [Request Type], [Country ID], GEO into [Cisco Report].dbo.Formula_TASK_test
+--from [Cisco Report].dbo.Formula_TASK$ 
+
+--select * from [Cisco Report].dbo.Formula_TASK_test order by RequestID ASC
+
+														--Delete Unneeded Column--
+
+delete from [Cisco Report].dbo.Formula_TASK_Completed --need to run this code to remove all data inside the table
+
+drop table [Cisco Report].dbo.a1 --after generating the report
+drop table [Cisco Report].dbo.a2
+drop table [Cisco Report].dbo.a3
+drop table [Cisco Report].dbo.a4 
+ALTER TABLE [Cisco Report].dbo.Formula_TASK_Completed 
+DROP COLUMN newactualydeliverydate;
+ALTER TABLE [Cisco Report].dbo.Formula_TASK_Completed 
+DROP COLUMN newcreateddate;
+ALTER TABLE [Cisco Report].dbo.Formula_TASK_Completed --delete column manualy at excel
+DROP COLUMN RequestID;
+
+--start run all the code below with "update" and anything with "new"
+															--Column Days--
+	alter table [Cisco Report].dbo.Formula_TASK_Completed 
+	add [Days] float
+
+	alter table [Cisco Report].dbo.Formula_TASK_Completed 
+	add newcreateddate datetime
+
+	update [Cisco Report].dbo.Formula_TASK_Completed 
+	 set newcreateddate = Created + 1
+	 where DATEPART(dw, Created) = 1
+
+	 update [Cisco Report].dbo.Formula_TASK_Completed 
+	 set newcreateddate = Created + 2
+	 where DATEPART(dw, Created) = 7
+
+	 update [Cisco Report].dbo.Formula_TASK_Completed 
+	 set newcreateddate = Created
+	 where newcreateddate is null
+
+	update [Cisco Report].dbo.Formula_TASK_Completed 
+	set [Cisco Report].dbo.Formula_TASK_Completed.[Days] =
+		DATEDIFF(dd, newcreateddate, [Report Date]) 
+		- (DATEDIFF(ww, newcreateddate, [Report Date]) * 2)
+		- (SELECT Count(*) FROM [Cisco Report].dbo.holidaydate as h WHERE (ph_date BETWEEN newcreateddate AND [Report Date])
+			AND DATEPART(Dw, ph_date) not in (1,7) AND h.country_id = main.[Country ID]) 
+	 From [Cisco Report].dbo.Formula_TASK_Completed as main
+
+														--Column Count Days--
+	 alter table [Cisco Report].dbo.Formula_TASK_Completed 
+	 add [Count Days] nvarchar(255)
+
+	 update [Cisco Report].dbo.Formula_TASK_Completed 
+	 set [Cisco Report].dbo.Formula_TASK_Completed.[Count Days] =
+	 CASE
+			WHEN [Days] < 11 THEN '0 - 10 Days'
+			WHEN [Days] < 16 THEN '11 - 15 Days'
+			WHEN [Days] < 21 THEN '16 - 20 Days'
+			WHEN [Days] < 31 THEN '21 - 30 Days'
+			ELSE '31 Days+'
+	END 
+	FROM [Cisco Report].dbo.Formula_TASK_Completed
+
+												--Column Number State (PFB excluded)--
+
+	alter table [Cisco Report].dbo.Formula_TASK_Completed 
+	add [Number State (PFB excluded)] float
+
+	update [Cisco Report].dbo.Formula_TASK_Completed 
+	set [Cisco Report].dbo.Formula_TASK_Completed.[Number State (PFB excluded)] =	
+	CASE
+		WHEN [Task Number State(state)] <> 'Pending for Billing' THEN '1' 
+			ELSE '0'
+		END 
+	FROM [Cisco Report].dbo.Formula_TASK_Completed
+
+														--Dup Date--
+										--only can use in Completed SQL, not in Formula SQL--
+	
+	alter table [Cisco Report].dbo.Formula_TASK_Completed 
+	add [Dup Date] bit
+
+	update [Cisco Report].dbo.Formula_TASK_Completed 
+    set [Cisco Report].dbo.Formula_TASK_Completed.[Dup Date] = 'TRUE'
+	where RequestID != '20564' --need to change the RequestID with the bottom RequestID in excel
+
+	update [Cisco Report].dbo.Formula_TASK_Completed 
+    set [Cisco Report].dbo.Formula_TASK_Completed.[Dup Date] = 'FALSE'
+	where RequestID = '20564'
+
+														--Week--
+
+	alter table [Cisco Report].dbo.Formula_TASK_Completed 
+	add [Week] nvarchar(255)
+
+	update [Cisco Report].dbo.Formula_TASK_Completed 
+      set [Cisco Report].dbo.Formula_TASK_Completed.[Week] = 
+	  DATEPART(Week, [Report Date]) - 1
+	from [Cisco Report].dbo.Formula_TASK_Completed
+
+																--Bundle--
+
+	alter table [Cisco Report].dbo.Formula_TASK_Completed 
+	add [Bundle] nvarchar(255)
+
+	update [Cisco Report].dbo.Formula_TASK_Completed  
+		set [Cisco Report].dbo.Formula_TASK_Completed.[Bundle] = 
+		(select [New Bundle] from [Cisco Report].dbo.a1 
+		where [Cisco Report].dbo.a1.RequestID = [Cisco Report].dbo.Formula_TASK_Completed.RequestID)
+
+															--Accepted Status--
+
+	 alter table [Cisco Report].dbo.Formula_TASK_Completed 
+	 add [Accepted Status] nvarchar(255)
+
+	 update [Cisco Report].dbo.Formula_TASK_Completed  
+		set [Cisco Report].dbo.Formula_TASK_Completed.[Accepted Status] = 
+		(select [New Accepted Status Status] from [Cisco Report].dbo.a2 
+		where [Cisco Report].dbo.a2.RequestID = [Cisco Report].dbo.Formula_TASK_Completed.RequestID)
+
+														--Actualy Delivery Date--
+
+	alter table [Cisco Report].dbo.Formula_TASK_Completed 
+	add [Actualy Delivery Date] datetime
+
+	update [Cisco Report].dbo.Formula_TASK_Completed  
+		set [Cisco Report].dbo.Formula_TASK_Completed.[Actualy Delivery Date] = 
+		(select [Actualy Delivery Date2] from [Cisco Report].dbo.a3 
+		where [Cisco Report].dbo.a3.RequestID = [Cisco Report].dbo.Formula_TASK_Completed.RequestID)
+
+														--After 10 Days POD--
+
+	alter table [Cisco Report].dbo.Formula_TASK_Completed 
+	add [After 10 Days POD] datetime
+
+	Alter table [Cisco Report].dbo.Formula_TASK_Completed 
+	 Add newactualydeliverydate datetime;
+
+	 update [Cisco Report].dbo.Formula_TASK_Completed 
+	 set newactualydeliverydate = [Actualy Delivery Date] + 1 
+	 where DATEPART(dw, [Actualy Delivery Date]) = 1
+
+	 update [Cisco Report].dbo.Formula_TASK_Completed 
+	 set newactualydeliverydate = [Actualy Delivery Date] + 2
+	 where DATEPART(dw, [Actualy Delivery Date]) = 7
+
+	 update [Cisco Report].dbo.Formula_TASK_Completed 
+	 set newactualydeliverydate = [Actualy Delivery Date]
+	 where newactualydeliverydate is null
+
+	 update [Cisco Report].dbo.Formula_TASK_Completed 
+     set [Cisco Report].dbo.Formula_TASK_Completed.[After 10 Days POD] = 
+		DATEADD(DW,14, newactualydeliverydate) 
+		from [Cisco Report].dbo.Formula_TASK_Completed 
+
+															--Accepted Day--
+
+	alter table [Cisco Report].dbo.Formula_TASK_Completed 
+	add [Accepted day] float
+
+	update [Cisco Report].dbo.Formula_TASK_Completed 
+      set [Cisco Report].dbo.Formula_TASK_Completed.[Accepted day] = 
+		DATEDIFF(dd, [After 10 Days POD], [Report Date]) 
+			- (DATEDIFF(ww, [After 10 Days POD], [Report Date]) * 2)
+			- (SELECT Count(*) FROM [Cisco Report].dbo.holidaydate as h WHERE (ph_date BETWEEN [After 10 Days POD] AND [Report Date] ) 
+				AND DATEPART(Dw, ph_date) not in (1,7) AND h.country_id = main.[Country ID]) 
+	 From [Cisco Report].dbo.Formula_TASK_Completed as main  
+
+	 Update [Cisco Report].dbo.Formula_TASK_Completed
+	 set [Cisco Report].dbo.Formula_TASK_Completed.[Accepted day] = 0
+	 where [Accepted day] < 0
+
+															--POD Delivery Days--
+
+	 alter table [Cisco Report].dbo.Formula_TASK_Completed 
+	 add [POD Delivery Days] float
+
+	 update [Cisco Report].dbo.Formula_TASK_Completed 
+      set [Cisco Report].dbo.Formula_TASK_Completed.[POD Delivery Days] = 
+	 		DATEDIFF(dd, newactualydeliverydate, [Report Date]) 
+			- (DATEDIFF(ww, newactualydeliverydate, [Report Date]) * 2)
+			- (SELECT Count(*) FROM [Cisco Report].dbo.holidaydate as h WHERE (ph_date BETWEEN newactualydeliverydate AND [Report Date]) 
+				AND DATEPART(Dw, ph_date) not in (1,7) AND h.country_id = main.[Country ID]) 
+			+ (SELECT Count(*) FROM [Cisco Report].dbo.holidaydate as h WHERE (ph_date BETWEEN [Report Date] AND newactualydeliverydate)
+				AND DATEPART(Dw, ph_date) not in (1,7) AND h.country_id = main.[Country ID])
+	 From [Cisco Report].dbo.Formula_TASK_Completed as main  
+
+														--POD Delivery Aging--
+
+	 alter table [Cisco Report].dbo.Formula_TASK_Completed 
+	 add [POD Delivery Aging] nvarchar(255)
+
+	 update [Cisco Report].dbo.Formula_TASK_Completed 
+     set [Cisco Report].dbo.Formula_TASK_Completed.[POD Delivery Aging] = 
+	 CASE
+				WHEN [POD Delivery Days] > 30 THEN '31 Days+'
+				WHEN [POD Delivery Days] > 20 THEN '21 - 30 Days'
+				WHEN [POD Delivery Days] > 15 THEN '16 - 20 Days'
+				WHEN [POD Delivery Days] > 10 THEN '11 - 15 Days'
+				WHEN [POD Delivery Days] > 0 THEN '0 - 10 Days'
+				ELSE null
+	END 
+	FROM [Cisco Report].dbo.Formula_TASK_Completed
+
+															--Request State--
+
+	alter table [Cisco Report].dbo.Formula_TASK_Completed 
+	add [Request State] nvarchar(255)
+
+	update [Cisco Report].dbo.Formula_TASK_Completed  
+		set [Cisco Report].dbo.Formula_TASK_Completed.[Request State] = 
+		(select [New Request State] from [Cisco Report].dbo.a4 
+		where [Cisco Report].dbo.a4.RequestID = [Cisco Report].dbo.Formula_TASK_Completed.RequestID)
+
+													--Closed Asset Request State--
+
+	 alter table [Cisco Report].dbo.Formula_TASK_Completed 
+	 add [Closed Asset Request State] nvarchar(255)
+
+	 update [Cisco Report].dbo.Formula_TASK_Completed  
+		set [Cisco Report].dbo.Formula_TASK_Completed.[Closed Asset Request State] = 
+	 CASE
+			WHEN [Request State] = 'Closed Complete' THEN 'Closed'
+			WHEN [Request State] = 'Closed Incomplete' THEN 'Closed'
+			WHEN [Request State] is null THEN null
+			ELSE 'Open'
+	END 
+	FROM [Cisco Report].dbo.Formula_TASK_Completed
+
+													--Accepted Day (exclude 0,NA)--
+
+	 alter table [Cisco Report].dbo.Formula_TASK_Completed
+	 add [Accepted Day (exclude 0, NA)] bit
+
+	 update [Cisco Report].dbo.Formula_TASK_Completed  
+		set [Cisco Report].dbo.Formula_TASK_Completed.[Accepted Day (exclude 0, NA)] = 
+			CASE
+			WHEN [Accepted day] = 0 or [Accepted day] is null THEN 'FALSE'
+			ELSE 'TRUE'
+	END
+	FROM [Cisco Report].dbo.Formula_TASK_Completed
+
+
