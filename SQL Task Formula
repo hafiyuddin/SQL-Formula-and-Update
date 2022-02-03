@@ -1,0 +1,310 @@
+	 select * from [Cisco Report].dbo.Formula_TASK$
+
+	 DROP TABLE dbo.a1;
+
+	 --go to this file and then find only title with a, example, a1, a2, a3, a4
+	 --after that go to another file to generate formula task report
+													--AGING (DAYS)--
+
+	 select Request, Created, newcreateddate, [Report Date], newreportdate from [2nd try].dbo.Formula_TASK$ 
+
+	 Alter table [Cisco Report].dbo.Formula_TASK$ 
+	 Add newcreateddate datetime;
+
+	 update [Cisco Report].dbo.Formula_TASK$ 
+	 set newcreateddate = Created + 1
+	 where DATEPART(dw, Created) = 1
+
+	 update [Cisco Report].dbo.Formula_TASK$ 
+	 set newcreateddate = Created + 2
+	 where DATEPART(dw, Created) = 7
+
+	 update [Cisco Report].dbo.Formula_TASK$ 
+	 set newcreateddate = Created
+	 where newcreateddate is null
+
+	 ALTER TABLE [Cisco Report].dbo.Formula_TASK$ 
+	 DROP COLUMN newcreateddate;
+
+	 select Request,[Country ID],  Created, newcreateddate, [Report Date], Days, 
+		DATEDIFF(dd, newcreateddate, [Report Date]) 
+		- (DATEDIFF(ww, newcreateddate, [Report Date]) * 2)
+		- (SELECT Count(*) FROM [Cisco Report].dbo.holidaydate as h WHERE (ph_date BETWEEN newcreateddate AND [Report Date])
+			AND DATEPART(Dw, ph_date) not in (1,7) AND h.country_id = main.[Country ID]) 
+	 From [Cisco Report].dbo.Formula_TASK$ as main
+	 where Created != newcreateddate
+	 where [Country ID] = 'BE'
+
+													--Count Days--
+
+	Select Request, [Days],
+		CASE
+			WHEN [Days] < 11 THEN '0 - 10 Days'
+			WHEN [Days] < 16 THEN '11 - 15 Days'
+			WHEN [Days] < 21 THEN '16 - 20 Days'
+			WHEN [Days] < 31 THEN '21 - 30 Days'
+			ELSE '31 Days+'
+	END as 'Count Days'
+	FROM [Cisco Report].dbo.Formula_TASK$
+
+											--Number State (PFB excluded)--
+
+	Select Request, [Task Number State(state)],
+	CASE
+		WHEN [Task Number State(state)] <> 'Pending for Billing' THEN '1' 
+			ELSE '0'
+		END as 'Number State (PFB excluded)'
+	FROM [Cisco Report].dbo.Formula_TASK$
+	Where [Task Number State(state)] is not null
+	Order by Request ASC
+
+															--Dup Date--
+										--only can use in Completed SQL, not in Formula SQL--
+
+	update [Cisco Report].dbo.Formula_TASK$ 
+    set [Cisco Report].dbo.Formula_TASK$.[Dup Date] = 'TRUE'
+	where RequestID != '16265'
+
+	update [Cisco Report].dbo.Formula_TASK$ 
+    set [Cisco Report].dbo.Formula_TASK$.[Dup Date] = 'FALSE'
+	where RequestID = '16265'
+
+																--Week--
+
+	Select Request, Number2, [Report Date] ,
+		Week = DATEPART(Week, [Report Date]) -1
+	from [Cisco Report].dbo.Formula_TASK$
+
+																--Bundle-- a1
+
+	--Match
+	Select RequestID, [Cisco Report].dbo.Formula_TASK$.[Request], Bundle, [Type] as [New Bundle] into [Cisco Report].dbo.a1 from [Cisco Report].dbo.Formula_TASK$ 
+	join [Cisco Report].dbo.[Bundle$] on [Cisco Report].dbo.[Bundle$].[Type] = [Cisco Report].dbo.Formula_TASK$.Bundle AND [Cisco Report].dbo.[Bundle$].Request = [Cisco Report].dbo.Formula_TASK$.Request
+
+	--Append
+	insert into [Cisco Report].dbo.a1 ([RequestID], [Request], Bundle , [New Bundle])
+	select [RequestID], [Request], Bundle, Bundle from [Cisco Report].dbo.Formula_TASK$
+
+	--Remove Duplicate
+
+	WITH requestcte as  
+	(  
+		SELECT*, ROW_NUMBER() over (PARTITION BY RequestID ORDER BY CASE WHEN Bundle is not null THEN 1
+				ELSE 2 END, [RequestID] ASC) as RowNumber  
+		FROM [Cisco Report].dbo.a1  
+		)  
+	SELECT * FROM requestcte 
+
+	WITH requestcte as  
+	(  
+		SELECT*, ROW_NUMBER() over (PARTITION BY RequestID ORDER BY CASE WHEN Bundle is not null THEN 1
+				ELSE 2 END, [RequestID] ASC) as RowNumber  
+		FROM [Cisco Report].dbo.a1  
+	)  
+	DELETE FROM requestcte WHERE RowNumber>1  
+  
+	SELECT * FROM [Cisco Report].dbo.a1 
+	where Bundle is not null
+	order by RequestID ASC
+
+	update [Cisco Report].dbo.a1 
+    set [Cisco Report].dbo.a1.[New Bundle] = null
+	where [New Bundle] = '#N/A'
+
+															--Accepted Status-- a2
+
+	--Match
+	Select [RequestID], [Cisco Report].dbo.Formula_TASK$.[Request], [Accepted Status], [Acceptance Status] as [New Accepted Status Status] into [Cisco Report].dbo.a2 from [Cisco Report].dbo.Formula_TASK$ 
+	join [Cisco Report].dbo.['Asset Report$'] on [Cisco Report].dbo.['Asset Report$'].[Acceptance Status] = [Cisco Report].dbo.Formula_TASK$.[Accepted Status] AND [Cisco Report].dbo.['Asset Report$'].Number = [Cisco Report].dbo.Formula_TASK$.Request
+
+	--Append
+	insert into [Cisco Report].dbo.a2([RequestID], [Request], [Accepted Status], [New Accepted Status Status])
+	select [RequestID], [Cisco Report].dbo.Formula_TASK$.[Request], [Accepted Status], [Accepted Status] from [Cisco Report].dbo.Formula_TASK$
+
+	--Remove Duplicate
+
+	WITH acceptedcte as  
+	(  
+		SELECT*, ROW_NUMBER() over (PARTITION BY RequestID ORDER BY CASE WHEN [New Accepted Status Status] is not null THEN 1
+				ELSE 2 END, [RequestID] ASC) as RowNumber  
+		FROM [Cisco Report].dbo.a2  
+	)  
+	SELECT * FROM acceptedcte 
+
+	WITH acceptedcte as  
+	(  
+		SELECT*, ROW_NUMBER() over (PARTITION BY RequestID ORDER BY CASE WHEN [New Accepted Status Status] is not null THEN 1
+				ELSE 2 END, [RequestID] ASC) as RowNumber  
+		FROM [Cisco Report].dbo.a2  
+	)  
+	DELETE FROM acceptedcte WHERE RowNumber>1  
+  
+	SELECT * FROM [Cisco Report].dbo.a2 
+
+	update [Cisco Report].dbo.a2 
+    set [Cisco Report].dbo.a2.[New Accepted Status Status] = null
+	where [New Accepted Status Status] = '#N/A'
+
+													--Actualy Delivery Date-- a3
+
+--Match
+Select [RequestID], [Cisco Report].dbo.Formula_TASK$.[Request], [Actualy Delivery Date], [Cisco Report].dbo.Formula_REQ$.[Delivery Date] as [Actualy Delivery Date2] into [Cisco Report].dbo.a3 from [Cisco Report].dbo.Formula_TASK$ 
+join [Cisco Report].dbo.Formula_REQ$ on [Cisco Report].dbo.Formula_REQ$.[Delivery Date] = [Cisco Report].dbo.Formula_TASK$.[Actualy Delivery Date] AND [Cisco Report].dbo.Formula_REQ$.Request = [Cisco Report].dbo.Formula_TASK$.Request
+
+--Append
+insert into [Cisco Report].dbo.a3([RequestID], [Request], [Actualy Delivery Date], [Actualy Delivery Date2])
+select [RequestID], [Request], [Actualy Delivery Date], [Actualy Delivery Date] from [Cisco Report].dbo.Formula_TASK$
+
+--Remove Duplicate
+
+WITH actualydeliverydatecte as  
+(  
+   SELECT*, ROW_NUMBER() over (PARTITION BY RequestID ORDER BY CASE WHEN [Actualy Delivery Date2] is not null THEN 1
+		   ELSE 2 END, [RequestID] ASC) as RowNumber  
+   FROM [Cisco Report].dbo.a3  
+)  
+SELECT * FROM actualydeliverydatecte 
+
+WITH actualydeliverydatecte as  
+(  
+   SELECT*, ROW_NUMBER() over (PARTITION BY RequestID ORDER BY CASE WHEN [Actualy Delivery Date2] is not null THEN 1
+		   ELSE 2 END, [RequestID] ASC) as RowNumber  
+   FROM [Cisco Report].dbo.a3   
+)  
+DELETE FROM actualydeliverydatecte WHERE RowNumber>1  
+  
+SELECT * FROM [Cisco Report].dbo.a3 Order by RequestID ASC	 
+
+update [Cisco Report].dbo.a3 
+    set [Cisco Report].dbo.a3.[Actualy Delivery Date2] = null
+	where [Actualy Delivery Date2] = '#N/A'
+
+																--After 10 Days POD--
+													--need to confirm with ariane / shereen--
+															--start date + 1 & + 2--
+														  --new after 10 days wrong--
+
+	 Alter table [Cisco Report].dbo.Formula_TASK$ 
+	 Add newactualydeliverydate datetime;
+
+	 update [Cisco Report].dbo.Formula_TASK$ 
+	 set newactualydeliverydate = [Actualy Delivery Date] + 1 
+	 where DATEPART(dw, [Actualy Delivery Date]) = 1
+
+	 update [Cisco Report].dbo.Formula_TASK$ 
+	 set newactualydeliverydate = [Actualy Delivery Date] + 2
+	 where DATEPART(dw, [Actualy Delivery Date]) = 7
+
+	 update [Cisco Report].dbo.Formula_TASK$ 
+	 set newactualydeliverydate = [Actualy Delivery Date]
+	 where newactualydeliverydate is null
+
+	 ALTER TABLE [Cisco Report].dbo.Formula_TASK$ 
+	 DROP COLUMN newactualydeliverydate;
+
+	Select Request, [Country ID], [Actualy Delivery Date], [After 10 Days POD], newactualydeliverydate,
+			DATEADD(DW,14, newactualydeliverydate) as 'New After 10 Days POD'
+		from [Cisco Report].dbo.Formula_TASK$ 
+		Where [Actualy Delivery Date] != newactualydeliverydate
+
+		
+
+																--Accepted Day--
+														  --All negative value = 0--
+
+	select Request,[Country ID], [After 10 Days POD], [Report Date], [Accepted Day],
+			DATEDIFF(dd, [After 10 Days POD], [Report Date]) 
+			- (DATEDIFF(ww, [After 10 Days POD], [Report Date]) * 2)
+			- (SELECT Count(*) FROM [Cisco Report].dbo.holidaydate as h WHERE (ph_date BETWEEN [After 10 Days POD] AND [Report Date] ) 
+				AND DATEPART(Dw, ph_date) not in (1,7) AND h.country_id = main.[Country ID]) 
+	 From [Cisco Report].dbo.Formula_TASK$ as main  
+	 where [Accepted Day] = 0
+
+	 Update [Cisco Report].dbo.Formula_TASK$
+	 set [Cisco Report].dbo.Formula_TASK$.[Accepted day] = 0
+	 where [Accepted day] < 0
+
+														--POD Delivery Days --
+
+	select Request,[Country ID], [Actualy Delivery Date], newactualydeliverydate, [Report Date], [POD Delivery Days],
+			DATEDIFF(dd, newactualydeliverydate, [Report Date]) 
+			- (DATEDIFF(ww, newactualydeliverydate, [Report Date]) * 2)
+			- (SELECT Count(*) FROM [Cisco Report].dbo.holidaydate as h WHERE (ph_date BETWEEN newactualydeliverydate AND [Report Date]) 
+				AND DATEPART(Dw, ph_date) not in (1,7) AND h.country_id = main.[Country ID]) 
+			+ (SELECT Count(*) FROM [Cisco Report].dbo.holidaydate as h WHERE (ph_date BETWEEN [Report Date] AND newactualydeliverydate)
+				AND DATEPART(Dw, ph_date) not in (1,7) AND h.country_id = main.[Country ID])
+	 From [Cisco Report].dbo.Formula_TASK$ as main  
+	 where [POD Delivery Days] < 0
+
+													--POD Delivery Aging--
+
+     Select Request, [POD Delivery Days],[POD Delivery Aging],
+			CASE
+				WHEN [POD Delivery Days] > 30 THEN '31 Days+'
+				WHEN [POD Delivery Days] > 20 THEN '21 - 30 Days'
+				WHEN [POD Delivery Days] > 15 THEN '16 - 20 Days'
+				WHEN [POD Delivery Days] > 10 THEN '11 - 15 Days'
+				WHEN [POD Delivery Days] > 0 THEN '0 - 10 Days'
+				ELSE null
+	END as 'New POD Delivery Aging'
+	FROM [Cisco Report].dbo.Formula_TASK$
+	Where [POD Delivery Days] ='14'
+	Order by [POD Delivery Days]
+
+													--Request state-- a4
+
+--Match
+Select [RequestID],[Cisco Report].dbo.Formula_TASK$.[Request], [Report Date], [Request State],  [Cisco Report].dbo.['Asset Report$'].[State] as [New Request State] into [Cisco Report].dbo.a4 from [Cisco Report].dbo.Formula_TASK$ 
+join [Cisco Report].dbo.['Asset Report$'] on [Cisco Report].dbo.['Asset Report$'].[State] = [Cisco Report].dbo.Formula_TASK$.[Request State] AND [Cisco Report].dbo.['Asset Report$'].Number = [Cisco Report].dbo.Formula_TASK$.Request
+
+--Append
+insert into [Cisco Report].dbo.a4([RequestID],[Request], [Report Date], [Request State],  [New Request State])
+select [RequestID], [Request], [Report Date], [Request State], [Request State]  from [Cisco Report].dbo.Formula_TASK$
+
+--Remove Duplicate
+
+WITH requeststatecte as  
+(  
+   SELECT*, ROW_NUMBER() over (PARTITION BY RequestID ORDER BY CASE WHEN [New Request State] is not null THEN 1
+		   ELSE 2 END, [RequestID] ASC) as RowNumber  
+   FROM [Cisco Report].dbo.a4  
+)  
+SELECT * FROM requeststatecte 
+
+WITH requeststatecte as  
+(  
+   SELECT*, ROW_NUMBER() over (PARTITION BY RequestID ORDER BY CASE WHEN [New Request State] is not null THEN 1
+		   ELSE 2 END, [RequestID] ASC) as RowNumber  
+   FROM [Cisco Report].dbo.a4   
+)  
+DELETE FROM requeststatecte WHERE RowNumber>1  
+  
+SELECT * FROM [Cisco Report].dbo.a4  
+
+update [Cisco Report].dbo.a4 
+    set [Cisco Report].dbo.a4.[New Request State] = null
+	where [New Request State] = '#N/A'
+
+													--Closed Asset Request State--
+
+     Select Request, [Request State], [Closed Asset Request State],
+		CASE
+			WHEN [Request State] = 'Closed Complete' THEN 'Closed'
+			WHEN [Request State] = 'Closed Incomplete' THEN 'Closed'
+			WHEN [Request State] is null THEN null
+			ELSE 'Open'
+	END as 'New Closed Asset Request State'
+	FROM [Cisco Report].dbo.Formula_TASK$
+	where [Request State] = 'Pending for Billing'
+
+													--Accepted Day (exclude 0, NA)--
+
+Select RequestID, Request, [Accepted day], [Accepted Day (exclude 0, NA)],
+		CASE
+			WHEN [Accepted day] = 0 or [Accepted day] is null THEN 'FALSE'
+			ELSE 'TRUE'
+	END as 'New Accepted Day (exclude 0, NA)'
+	FROM [Cisco Report].dbo.Formula_TASK$
+
+		
+
